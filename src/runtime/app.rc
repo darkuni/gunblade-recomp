@@ -7,11 +7,11 @@ BEGIN
   BEGIN
     BLOCK "040904B0"
     BEGIN
-      VALUE "FileDescription", "Ghost Squad (native port)"
-      VALUE "ProductName", "Ghost Squad native port"
+      VALUE "FileDescription", "Gunblade NY & L.A. Machineguns (native port)"
+      VALUE "ProductName", "Gunblade NY & L.A. Machineguns native port"
       VALUE "FileVersion", "0.1"
       VALUE "ProductVersion", "0.1"
-      VALUE "OriginalFilename", "ghostsquad.exe"
+      VALUE "OriginalFilename", "gunblade.exe"
     END
   END
   BLOCK "VarFileInfo"
