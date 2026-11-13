@@ -176,7 +176,7 @@ static uint8_t g_part[32]; static int g_partn = 0;
 // list overruns its exactly-sized buffer and GXEndDisplayList reports overflow (size 0). The Model 2/3
 // emulators build per-object lists that way, so a quarter of the polygons vanished (Gunblade NY
 // sidewalks and car roofs, L.A. Machineguns car fronts).
-void gx_wgp_reset() { g_partn = 0; }
+void gx_wgp_reset() { static bool off = getenv("GX_NOWGPRESET") != nullptr; if (!off) g_partn = 0; }
 static uint32_t g_rptr = 0;          // physical address of the next burst the GP reads
 static bool g_bp_latched = false;    // interrupt raised for the current stall
 static uint32_t pi_reg(uint32_t a) { return mmio_peek(a); }

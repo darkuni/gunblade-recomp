@@ -37,7 +37,7 @@ uint64_t gx_frame_count() { return g_frame; }
 static uint64_t g_tex_epoch = 1;   // bumps each frame and on TLUT loads: texture cache re-validates
 char g_perf_text[128] = "";
 #include <chrono>
-static uint64_t g_ns_draw = 0, g_ns_copy = 0;
+static uint64_t g_ns_draw = 0, g_ns_copy = 0, g_st_hash = 0, g_st_up = 0, g_st_upb = 0, g_ns_tex = 0;
 static uint64_t g_batches = 0, g_draw_calls_in = 0;
 static inline uint64_t now_ns_r();
 struct ScopeNs { uint64_t& acc; uint64_t t; ScopeNs(uint64_t& a) : acc(a), t(now_ns_r()) {} ~ScopeNs() { acc += now_ns_r() - t; } };
@@ -75,7 +75,19 @@ static const char* kVS =
     "void main(){ gl_Position=a_pos; v_c0=a_c0; v_c1=a_c1;\n"
     " v_tc[0]=a_tc0; v_tc[1]=a_tc1; v_tc[2]=a_tc2; v_tc[3]=a_tc3; v_tc[4]=a_tc4; v_tc[5]=a_tc5; v_tc[6]=a_tc6; v_tc[7]=a_tc7; }\n";
 
-struct Prog { GLuint p; GLint u_reg, u_konst, u_aref, u_tex, u_tcsize, u_texsize, u_indmtx; };
+struct Prog { GLuint p; GLint u_reg, u_konst, u_aref, u_tex, u_tcsize, u_texsize, u_indmtx;
+              float last_reg[16], last_kon[16], last_aref[2]; bool last_ok = false; };
+// GL state already set by the draw path, so per-draw setup only touches what changed. Anything else
+// that touches GL state (EFB copies, presenting, EFB re-creation) calls gl_cache_invalidate() afterwards.
+static struct GlCache {
+    GLuint fbo, prog; int vpw, vph; int active; GLuint tex[8], smp[8];
+    bool state_ok; uint32_t state_sig[9];
+} g_glc;
+static void gl_cache_invalidate() {
+    g_glc.fbo = g_glc.prog = ~0u; g_glc.vpw = g_glc.vph = -1; g_glc.active = -1; g_glc.state_ok = false;
+    for (int i = 0; i < 8; i++) g_glc.tex[i] = g_glc.smp[i] = ~0u;
+}
+static inline void glc_active(int m) { if (g_glc.active != m) { glActiveTexture(GL_TEXTURE0 + m); g_glc.active = m; } }
 static std::unordered_map<uint64_t, Prog> g_progs;
 
 static Prog& get_prog() {
@@ -96,7 +108,7 @@ static Prog& get_prog() {
     pr.u_tcsize = glGetUniformLocation(pr.p, "u_tcsize");
     pr.u_texsize = glGetUniformLocation(pr.p, "u_texsize");
     pr.u_indmtx = glGetUniformLocation(pr.p, "u_indmtx");
-    glUseProgram(pr.p);
+    glUseProgram(pr.p); g_glc.prog = pr.p;
     GLint units[8] = {0, 1, 2, 3, 4, 5, 6, 7};
     glUniform1iv(pr.u_tex, 8, units);
     return g_progs[key] = pr;
@@ -109,6 +121,7 @@ static int g_cfg_msaa_seen = -1;
 static int g_msaa = 1;
 static GLuint g_efb_dtex = 0;   // single-sample depth as a texture (for Z copies)
 static void create_efb() {
+    gl_cache_invalidate();
     if (!g_fbo) glGenFramebuffers(1, &g_fbo);
     if (!g_rfbo) glGenFramebuffers(1, &g_rfbo);
     if (!g_efb_color) glGenTextures(1, &g_efb_color);
@@ -549,7 +562,7 @@ static void bind_texmap(int m) {
     uint32_t addr = ((img3 & 0xFFFFFF) << 5) | 0x80000000u;
     if (g_gxdbg && g_frame_tex.size() < 400) { char b[64]; snprintf(b, sizeof b, " t%d:%08X/%d/%dx%d", m, addr, fmt, w, h); g_frame_tex += b; }
     if (addr >= 0x81800000u && addr < 0x90000000u) addr = (addr & 0x0FFFFFFF) | 0x80000000u;
-    glActiveTexture(GL_TEXTURE0 + m);
+    glc_active(m);
     GLuint tex = 0;
     int levels = 1;
     auto cp = g_copies.find(addr);
@@ -566,7 +579,7 @@ static void bind_texmap(int m) {
         CopyEntry& e = cp->second;
         if (!e.pad) glGenTextures(1, &e.pad);
         if (e.pw != w || e.ph != h || e.prs != RS) {
-            glBindTexture(GL_TEXTURE_2D, e.pad);
+            glBindTexture(GL_TEXTURE_2D, e.pad); g_glc.tex[m] = ~0u;
             std::vector<uint8_t> zero((size_t)w * RS * h * RS * 4, 0);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w * RS, h * RS, 0, GL_RGBA, GL_UNSIGNED_BYTE, zero.data());
             e.pw = w; e.ph = h; e.prs = RS; e.pgen = ~0ull;
@@ -606,6 +619,7 @@ static void bind_texmap(int m) {
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prev_draw);
             glBindFramebuffer(GL_READ_FRAMEBUFFER, prev_read);
             glEnable(GL_SCISSOR_TEST);   // only reached from draw setup, where the scissor is on
+            g_glc.fbo = ~0u;
             e.pgen = gsum;
             static long paddump = getenv("PADDUMP") ? atol(getenv("PADDUMP")) : -1;   // debug: save the composed texture
             if ((long)g_frame == paddump) {
@@ -638,18 +652,25 @@ static void bind_texmap(int m) {
         if (e.checked != g_tex_epoch || e.gen != want_gen) {
             uint32_t sz = 0;
             for (int l = 0; l < game_levels; l++) sz += tex_size_bytes(fmt, std::max(1, w >> l), std::max(1, h >> l));
+            g_st_hash += sz;
             uint64_t hsh = hash_mem(addr, sz);
             if (fmt >= 8 && fmt <= 10) for (int i = 0; i < 512; i++) hsh = (hsh ^ g_tmem[(tlut_addr + i) & 0xFFFFF]) * 1099511628211ull;
             if (!e.tex || hsh != e.hash || e.gen != want_gen) {
+                ScopeNs _st(g_ns_tex); g_st_up++; g_st_upb += sz;
+                { static bool ul = getenv("TEXUPLOG") != nullptr; if (ul && g_frame % 100 == 0) fprintf(g_log, "[texup] f%llu draw%d %08X fmt %d %dx%d lv %d tlut %X\n", (unsigned long long)g_frame, g_frame_draws, addr, fmt, w, h, game_levels, tlut); }
                 std::vector<uint32_t> px;
+                // same size and level count as the GL texture already holds: update it in place instead of
+                // re-creating its storage (games that redraw a texture every frame, like the Model 2/3 2D layers)
+                const bool same = e.tex && e.w == w && e.h == h && e.levels == game_levels && !e.gen && !want_gen;
                 if (!e.tex) glGenTextures(1, &e.tex);
-                glBindTexture(GL_TEXTURE_2D, e.tex);
+                glBindTexture(GL_TEXTURE_2D, e.tex); g_glc.tex[m] = ~0u;
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
                 uint32_t off = 0;
                 for (int l = 0; l < game_levels; l++) {
                     int lw = std::max(1, w >> l), lh = std::max(1, h >> l);
                     tex_decode(MEM + ((addr + off) & 0x9FFFFFFFu), fmt, lw, lh, tlut_addr, tlut_fmt, px);
-                    glTexImage2D(GL_TEXTURE_2D, l, GL_RGBA8, lw, lh, 0, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
+                    if (same) glTexSubImage2D(GL_TEXTURE_2D, l, 0, 0, lw, lh, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
+                    else glTexImage2D(GL_TEXTURE_2D, l, GL_RGBA8, lw, lh, 0, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
                     off += tex_size_bytes(fmt, lw, lh);
                     if (l == 0) {
                         static uint32_t dump_addr = getenv("TEXDUMP") ? (uint32_t)strtoul(getenv("TEXDUMP"), nullptr, 16) : 0;
@@ -675,14 +696,21 @@ static void bind_texmap(int m) {
         tex = e.tex;
         levels = e.levels;
     }
-    glBindTexture(GL_TEXTURE_2D, tex);
+    if (g_glc.tex[m] != tex) { glBindTexture(GL_TEXTURE_2D, tex); g_glc.tex[m] = tex; }
     // game-stored mip chains honour the game's LOD range; generated chains use all levels
-    glBindSampler(m, get_sampler(mode0, levels > 1 && !(((mode0 >> 5) & 3) != 0) ? (mode1 & 0xFF) : mode1, levels));
+    GLuint smp = get_sampler(mode0, levels > 1 && !(((mode0 >> 5) & 3) != 0) ? (mode1 & 0xFF) : mode1, levels);
+    if (g_glc.smp[m] != smp) { glBindSampler(m, smp); g_glc.smp[m] = smp; }
 }
 
 // ---------------------------------------------------------------- pixel state
 static void apply_state() {
     const uint32_t* bp = g_gx.bp;
+    {
+        static bool nocull_ = getenv("GX_NOCULL") != nullptr;
+        uint32_t sig[9] = {bp[0x00] & (3u << 14), bp[0x40], bp[0x41], bp[0x42], bp[0x43], bp[0x20], bp[0x21], bp[0x59], (uint32_t)RS | (nocull_ ? 0x100u : 0u)};
+        if (g_glc.state_ok && !memcmp(sig, g_glc.state_sig, sizeof sig)) return;
+        memcpy(g_glc.state_sig, sig, sizeof sig); g_glc.state_ok = true;
+    }
     // depth
     uint32_t zm = bp[0x40];
     if (zm & 1) { glEnable(GL_DEPTH_TEST); glDepthFunc(GL_NEVER + ((zm >> 1) & 7)); }
@@ -765,6 +793,7 @@ static void save_ppm(const char* path, const std::vector<uint8_t>& rgba, int w, 
 
 void save_ppm_ext(const char* p, const std::vector<uint8_t>& b, int w, int h) { save_ppm(p, b, w, h); }
 static void resize_efb(int scale) {
+    gl_cache_invalidate();
     RS = scale; PW = EFB_W * RS; PH = EFB_H * RS;
     create_efb();
     // EFB copies made at the old scale are re-created on their next copy
@@ -873,7 +902,7 @@ static void xfb_upload_ram(GLuint tex, uint32_t base, int w, int h, int stride) 
 }
 
 static void efb_copy_impl(uint32_t val);
-static void efb_copy(uint32_t val) { gx_flush(); ScopeNs _sc(g_ns_copy); efb_copy_impl(val); }
+static void efb_copy(uint32_t val) { gx_flush(); ScopeNs _sc(g_ns_copy); efb_copy_impl(val); gl_cache_invalidate(); }
 static void efb_copy_impl(uint32_t val) {
     const uint32_t* bp = g_gx.bp;
     int sx = bp[0x49] & 1023, sy = (bp[0x49] >> 10) & 1023;
@@ -925,6 +954,9 @@ static void efb_copy_impl(uint32_t val) {
                 fprintf(g_log, "[perf] %.1f fps | VI %.1f/s (want 59.9) | audio %.0f/s (want 333) | GPU draw %.0f%%, copies %.0f%% of time | %.0f draws -> %.0f GL calls per frame\n",
                         (g_frame - f0) / sec, (g_vi_count - vi0) / sec, (g_ax_frames - ax0) / sec, g_ns_draw / 1e7 / sec, g_ns_copy / 1e7 / sec,
                         (double)g_draw_calls_in / std::max<uint64_t>(1, g_frame - f0), (double)g_batches / std::max<uint64_t>(1, g_frame - f0));
+                { double fr = (double)std::max<uint64_t>(1, g_frame - f0);
+                  fprintf(g_log, "[perf] tex: hashed %.0f KB/frame, uploads %.1f/frame (%.0f KB/frame), upload time %.1f%%\n", g_st_hash / 1024.0 / fr, g_st_up / fr, g_st_upb / 1024.0 / fr, g_ns_tex / 1e7 / sec);
+                  g_st_hash = g_st_up = g_st_upb = g_ns_tex = 0; }
                 g_draw_calls_in = g_batches = 0;
                 fflush(g_log);
                 t0 = t; f0 = g_frame; g_ns_draw = g_ns_copy = 0; vi0 = g_vi_count; ax0 = g_ax_frames;
@@ -1132,15 +1164,18 @@ void gx_flush() {
 void gx_state_changing() { if (g_batch_open) gx_flush(); }
 
 static void setup_draw_state(uint8_t prim, uint32_t count, const std::vector<Vtx>& verts) {
-    glBindFramebuffer(GL_FRAMEBUFFER, g_fbo);
-    glViewport(0, 0, PW, PH);
+    if (g_glc.fbo != g_fbo) { glBindFramebuffer(GL_FRAMEBUFFER, g_fbo); g_glc.fbo = g_fbo; }
+    if (g_glc.vpw != PW || g_glc.vph != PH) { glViewport(0, 0, PW, PH); g_glc.vpw = PW; g_glc.vph = PH; }
     Prog& pr = get_prog();
-    glUseProgram(pr.p);
+    if (g_glc.prog != pr.p) { glUseProgram(pr.p); g_glc.prog = pr.p; }
     float regs[16], kon[16];
     for (int i = 0; i < 4; i++) for (int k = 0; k < 4; k++) { regs[i * 4 + k] = g_tevreg[i][k]; kon[i * 4 + k] = g_konst[i][k]; }
-    glUniform4fv(pr.u_reg, 4, regs);
-    glUniform4fv(pr.u_konst, 4, kon);
-    glUniform2f(pr.u_aref, (float)(g_gx.bp[0xF3] & 255), (float)((g_gx.bp[0xF3] >> 8) & 255));
+    float aref[2] = {(float)(g_gx.bp[0xF3] & 255), (float)((g_gx.bp[0xF3] >> 8) & 255)};
+    // uniforms belong to the program object, so a program keeps what was last uploaded to it
+    if (!pr.last_ok || memcmp(regs, pr.last_reg, sizeof regs)) { glUniform4fv(pr.u_reg, 4, regs); memcpy(pr.last_reg, regs, sizeof regs); }
+    if (!pr.last_ok || memcmp(kon, pr.last_kon, sizeof kon)) { glUniform4fv(pr.u_konst, 4, kon); memcpy(pr.last_kon, kon, sizeof kon); }
+    if (!pr.last_ok || memcmp(aref, pr.last_aref, sizeof aref)) { glUniform2f(pr.u_aref, aref[0], aref[1]); memcpy(pr.last_aref, aref, sizeof aref); }
+    pr.last_ok = true;
     // textures used by enabled stages
     int nstages = ((g_gx.bp[0x00] >> 10) & 15) + 1;
     uint32_t used = 0;
