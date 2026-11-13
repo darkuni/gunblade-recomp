@@ -92,6 +92,11 @@ static bool dvd_read(uint32_t dst, uint32_t len, uint64_t off) {
     fseek(f, (long)(off - it->off), SEEK_SET);
     std::vector<uint8_t> buf(len, 0);
     size_t got = fread(buf.data(), 1, len, f);
+    // Past the end of a file a real disc holds the mastering tool's junk fill, never zeros. Gunblade's
+    // Model 2 loader (vm::BinLoader + Geometrizer::parse) reads the 32-byte-aligned tail of each rsrv
+    // file and only stops on a chunk size too large to fit; zeros there parse as an empty chunk and the
+    // load never reports done (the game sat on the mission briefing).
+    if (got < len) memset(buf.data() + got, 0xFF, len - got);
     memcpy(MEM + (dst & 0x9FFFFFFFu), buf.data(), len);
     static int logged = 0;
     static const int lim = getenv("DVDLOG") ? 1 << 30 : 200;
