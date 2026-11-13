@@ -31959,6 +31959,11 @@ void f_C0000000(Ctx* __restrict c) {
   {uint32_t ea=c->r[5]+0x00000004u; WF32(ea,c->f[2]);} // C0000028
   {uint32_t ea=c->r[5]+0x00000008u; WF32(ea,c->f[0]);} // C000002C
   return; // C0000030
+}
+
+// LA_RSOF_34
+void f_C0000034(Ctx* __restrict c) {
+  trace_call(0xC0000034u);
   {uint32_t ea=c->r[4]+0x00000000u; c->f[1]=c->ps1[1]=RF32(ea);} // C0000034
   {uint32_t ea=c->r[3]+0x00000000u; c->f[0]=c->ps1[0]=RF32(ea);} // C0000038
   {uint32_t ea=c->r[4]+0x00000004u; c->f[3]=c->ps1[3]=RF32(ea);} // C000003C
@@ -34732,6 +34737,11 @@ L_C0002774:;
   c->lr=c->r[0]; // C0002780
   c->r[1]=c->r[1]+0x00000030u; // C0002784
   return; // C0002788
+}
+
+// LA_RSOF_278C
+void f_C000278C(Ctx* __restrict c) {
+  trace_call(0xC000278Cu);
   {uint32_t ea=c->r[1]+0xFFFFFFE0u; W32(ea,c->r[1]); c->r[1]=ea;} // C000278C
   c->r[0]=c->lr; // C0002790
   c->r[7]=0u+((uint32_t)(uint16_t)(((g_relsec[0][1]+0x2614u)+0x8000u)>>16)<<16); // C0002794
@@ -41306,6 +41316,11 @@ L_C0008614:;
   c->lr=c->r[0]; // C000867C
   c->r[1]=c->r[1]+0x00000080u; // C0008680
   return; // C0008684
+}
+
+// LA_RSOF_8688
+void f_C0008688(Ctx* __restrict c) {
+  trace_call(0xC0008688u);
   {uint32_t ea=c->r[1]+0xFFFFFFF0u; W32(ea,c->r[1]); c->r[1]=ea;} // C0008688
   c->r[0]=c->lr; // C000868C
   W32(c->r[1]+0x00000014u,c->r[0]); // C0008690
@@ -42124,6 +42139,11 @@ L_C000920C:;
   c->lr=c->r[0]; // C0009254
   c->r[1]=c->r[1]+0x00000020u; // C0009258
   return; // C000925C
+}
+
+// LA_RSOF_9260
+void f_C0009260(Ctx* __restrict c) {
+  trace_call(0xC0009260u);
   {uint32_t ea=c->r[1]+0xFFFFFFF0u; W32(ea,c->r[1]); c->r[1]=ea;} // C0009260
   c->r[0]=c->lr; // C0009264
   W32(c->r[1]+0x00000014u,c->r[0]); // C0009268
@@ -42477,6 +42497,11 @@ L_C0009748:;
   c->lr=c->r[0]; // C000974C
   c->r[1]=c->r[1]+0x00000010u; // C0009750
   return; // C0009754
+}
+
+// LA_RSOF_9758
+void f_C0009758(Ctx* __restrict c) {
+  trace_call(0xC0009758u);
   {uint32_t ea=c->r[1]+0xFFFFFFE0u; W32(ea,c->r[1]); c->r[1]=ea;} // C0009758
   c->r[0]=c->lr; // C000975C
   W32(c->r[1]+0x00000024u,c->r[0]); // C0009760
@@ -43683,222 +43708,5 @@ void f_C000A834(Ctx* __restrict c) {
   trace_call(0xC000A834u);
   c->r[3]=0u+0x00000004u; // C000A834
   f_C005A440(c); return; // C000A838
-}
-
-// LA_RSOF_A83C
-void f_C000A83C(Ctx* __restrict c) {
-  trace_call(0xC000A83Cu);
-  c->r[3]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x1D8u)+0x8000u)>>16)<<16); // C000A83C
-  c->r[3]=R32(c->r[3]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1D8u)); // C000A840
-  return; // C000A844
-}
-
-// LA_RSOF_A848
-void f_C000A848(Ctx* __restrict c) {
-  trace_call(0xC000A848u);
-  {uint32_t ea=c->r[1]+0xFFFFFFF0u; W32(ea,c->r[1]); c->r[1]=ea;} // C000A848
-  c->r[0]=c->lr; // C000A84C
-  c->r[4]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x10708u)+0x8000u)>>16)<<16); // C000A850
-  W32(c->r[1]+0x00000014u,c->r[0]); // C000A854
-  W32(c->r[1]+0x0000000Cu,c->r[31]); // C000A858
-  c->r[31]=c->r[3]|c->r[3]; // C000A85C
-  c->r[4]=R32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x10708u)); // C000A860
-  c->r[0]=rotl(c->r[4],0)&0x00000004u; cr0(c,c->r[0]); // C000A864
-  if (crb(c,2)) { goto L_C000A874; } // C000A868
-  c->lr=0xC000A870u; f_C0020DC8(c); // C000A86C
-  goto L_C000A8A4; // C000A870
-L_C000A874:;
-  c->r[0]=rotl(c->r[4],0)&0x00008000u; cr0(c,c->r[0]); // C000A874
-  if (!crb(c,2)) { goto L_C000A8A4; } // C000A878
-  c->r[4]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x1E0u)+0x8000u)>>16)<<16); // C000A87C
-  c->r[3]=R32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1E0u)); // C000A880
-  cmps(c,0,(int32_t)c->r[3],70); // C000A884
-  c->r[0]=c->r[3]+0xFFFFFFFFu; // C000A888
-  W32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1E0u),c->r[0]); // C000A88C
-  if (!crb(c,0)) { goto L_C000A8A4; } // C000A890
-  c->r[3]=0u+0x00000026u; // C000A894
-  c->lr=0xC000A89Cu; f_C0036778(c); // C000A898
-  c->r[3]=c->r[31]|c->r[31]; // C000A89C
-  c->lr=0xC000A8A4u; f_C0020DC8(c); // C000A8A0
-L_C000A8A4:;
-  c->r[0]=R32(c->r[1]+0x00000014u); // C000A8A4
-  c->r[31]=R32(c->r[1]+0x0000000Cu); // C000A8A8
-  c->lr=c->r[0]; // C000A8AC
-  c->r[1]=c->r[1]+0x00000010u; // C000A8B0
-  return; // C000A8B4
-}
-
-// LA_RSOF_A8B8
-void f_C000A8B8(Ctx* __restrict c) {
-  trace_call(0xC000A8B8u);
-  {uint32_t ea=c->r[1]+0xFFFFFFE0u; W32(ea,c->r[1]); c->r[1]=ea;} // C000A8B8
-  c->r[0]=c->lr; // C000A8BC
-  c->r[4]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x10708u)+0x8000u)>>16)<<16); // C000A8C0
-  W32(c->r[1]+0x00000024u,c->r[0]); // C000A8C4
-  W32(c->r[1]+0x0000001Cu,c->r[31]); // C000A8C8
-  W32(c->r[1]+0x00000018u,c->r[30]); // C000A8CC
-  c->r[30]=0u+((uint32_t)(uint16_t)(((g_relsec[0][2]+0xB68u)+0x8000u)>>16)<<16); // C000A8D0
-  c->r[30]=c->r[30]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][2]+0xB68u); // C000A8D4
-  W32(c->r[1]+0x00000014u,c->r[29]); // C000A8D8
-  c->r[29]=c->r[3]|c->r[3]; // C000A8DC
-  c->r[4]=R32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x10708u)); // C000A8E0
-  c->r[0]=rotl(c->r[4],0)&0x00000004u; cr0(c,c->r[0]); // C000A8E4
-  if (crb(c,2)) { goto L_C000A8F4; } // C000A8E8
-  c->lr=0xC000A8F0u; f_C0020DC8(c); // C000A8EC
-  goto L_C000A98C; // C000A8F0
-L_C000A8F4:;
-  c->r[0]=rotl(c->r[4],0)&0x00008000u; cr0(c,c->r[0]); // C000A8F4
-  if (!crb(c,2)) { goto L_C000A98C; } // C000A8F8
-  c->r[4]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x1E0u)+0x8000u)>>16)<<16); // C000A8FC
-  c->r[3]=R32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1E0u)); // C000A900
-  cmps(c,0,(int32_t)c->r[3],330); // C000A904
-  c->r[0]=c->r[3]+0xFFFFFFFFu; // C000A908
-  W32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1E0u),c->r[0]); // C000A90C
-  if (!crb(c,0)) { goto L_C000A98C; } // C000A910
-  c->r[3]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0xEB28u)+0x8000u)>>16)<<16); // C000A914
-  c->r[0]=0u+0x00000002u; // C000A918
-  c->r[3]=R32(c->r[3]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0xEB28u)); // C000A91C
-  goto L_C000A92C; // C000A920
-L_C000A924:;
-  W16(c->r[3]+0x00000014u,c->r[0]); // C000A924
-  c->r[3]=R32(c->r[3]+0x00000020u); // C000A928
-L_C000A92C:;
-  cmps(c,0,(int32_t)c->r[3],0); // C000A92C
-  if (!crb(c,2)) { IRQCHK(c); goto L_C000A924; } // C000A930
-  c->r[31]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x1DCu)+0x8000u)>>16)<<16); // C000A934
-  {uint32_t ea=c->r[30]+0x00000000u; c->f[1]=c->ps1[1]=RF32(ea);} // C000A938
-  {uint32_t ea=c->r[30]+0x00000004u; c->f[2]=c->ps1[2]=RF32(ea);} // C000A93C
-  c->r[3]=0u+0x00000000u; // C000A940
-  {uint32_t ea=c->r[30]+0x00000008u; c->f[3]=c->ps1[3]=RF32(ea);} // C000A944
-  c->r[4]=0u+0x00000000u; // C000A948
-  c->r[6]=R32(c->r[31]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1DCu)); // C000A94C
-  c->r[5]=0u+0x00000000u; // C000A950
-  c->r[7]=0u+0x00000031u; // C000A954
-  c->lr=0xC000A95Cu; f_C003849C(c); // C000A958
-  {uint32_t ea=c->r[30]+0x0000000Cu; c->f[1]=c->ps1[1]=RF32(ea);} // C000A95C
-  c->r[3]=0u+0x00000000u; // C000A960
-  {uint32_t ea=c->r[30]+0x00000010u; c->f[2]=c->ps1[2]=RF32(ea);} // C000A964
-  c->r[4]=0u+0x00000000u; // C000A968
-  {uint32_t ea=c->r[30]+0x00000014u; c->f[3]=c->ps1[3]=RF32(ea);} // C000A96C
-  c->r[5]=0u+0x00000000u; // C000A970
-  c->r[6]=R32(c->r[31]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1DCu)); // C000A974
-  c->r[7]=0u+0x00000031u; // C000A978
-  c->lr=0xC000A980u; f_C003849C(c); // C000A97C
-  c->r[3]=0u+((uint32_t)(uint16_t)(((g_relsec[0][1]+0xA848u)+0x8000u)>>16)<<16); // C000A980
-  c->r[3]=c->r[3]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][1]+0xA848u); // C000A984
-  W32(c->r[29]+0x0000000Cu,c->r[3]); // C000A988
-L_C000A98C:;
-  c->r[0]=R32(c->r[1]+0x00000024u); // C000A98C
-  c->r[31]=R32(c->r[1]+0x0000001Cu); // C000A990
-  c->r[30]=R32(c->r[1]+0x00000018u); // C000A994
-  c->r[29]=R32(c->r[1]+0x00000014u); // C000A998
-  c->lr=c->r[0]; // C000A99C
-  c->r[1]=c->r[1]+0x00000020u; // C000A9A0
-  return; // C000A9A4
-}
-
-// LA_RSOF_A9A8
-void f_C000A9A8(Ctx* __restrict c) {
-  trace_call(0xC000A9A8u);
-  {uint32_t ea=c->r[1]+0xFFFFFFF0u; W32(ea,c->r[1]); c->r[1]=ea;} // C000A9A8
-  c->r[0]=c->lr; // C000A9AC
-  c->r[4]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x10708u)+0x8000u)>>16)<<16); // C000A9B0
-  W32(c->r[1]+0x00000014u,c->r[0]); // C000A9B4
-  W32(c->r[1]+0x0000000Cu,c->r[31]); // C000A9B8
-  c->r[31]=0u+((uint32_t)(uint16_t)(((g_relsec[0][2]+0xB68u)+0x8000u)>>16)<<16); // C000A9BC
-  c->r[31]=c->r[31]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][2]+0xB68u); // C000A9C0
-  W32(c->r[1]+0x00000008u,c->r[30]); // C000A9C4
-  c->r[30]=c->r[3]|c->r[3]; // C000A9C8
-  c->r[4]=R32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x10708u)); // C000A9CC
-  c->r[0]=rotl(c->r[4],0)&0x00000004u; cr0(c,c->r[0]); // C000A9D0
-  if (crb(c,2)) { goto L_C000A9E0; } // C000A9D4
-  c->lr=0xC000A9DCu; f_C0020DC8(c); // C000A9D8
-  goto L_C000AAA4; // C000A9DC
-L_C000A9E0:;
-  c->r[0]=rotl(c->r[4],0)&0x00008000u; cr0(c,c->r[0]); // C000A9E0
-  if (!crb(c,2)) { goto L_C000AAA4; } // C000A9E4
-  c->r[4]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x1E0u)+0x8000u)>>16)<<16); // C000A9E8
-  c->r[3]=R32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1E0u)); // C000A9EC
-  cmps(c,0,(int32_t)c->r[3],0); // C000A9F0
-  c->r[0]=c->r[3]+0xFFFFFFFFu; // C000A9F4
-  W32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1E0u),c->r[0]); // C000A9F8
-  if (!crb(c,0)) { goto L_C000AAA4; } // C000A9FC
-  c->r[3]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0xEB28u)+0x8000u)>>16)<<16); // C000AA00
-  c->r[0]=0u+0x00000002u; // C000AA04
-  c->r[3]=R32(c->r[3]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0xEB28u)); // C000AA08
-  goto L_C000AA18; // C000AA0C
-L_C000AA10:;
-  W16(c->r[3]+0x00000014u,c->r[0]); // C000AA10
-  c->r[3]=R32(c->r[3]+0x00000020u); // C000AA14
-L_C000AA18:;
-  cmps(c,0,(int32_t)c->r[3],0); // C000AA18
-  if (!crb(c,2)) { IRQCHK(c); goto L_C000AA10; } // C000AA1C
-  c->lr=0xC000AA24u; f_C0078008(c); // C000AA20
-  {uint32_t ea=c->r[31]+0x00000018u; c->f[1]=c->ps1[1]=RF32(ea);} // C000AA24
-  {uint32_t ea=c->r[31]+0x0000001Cu; c->f[2]=c->ps1[2]=RF32(ea);} // C000AA28
-  c->lr=0xC000AA30u; f_C005B344(c); // C000AA2C
-  c->r[4]=0u+((uint32_t)(uint16_t)(((g_relsec[0][1]+0xB288u)+0x8000u)>>16)<<16); // C000AA30
-  c->r[3]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x106A0u)+0x8000u)>>16)<<16); // C000AA34
-  c->r[4]=c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][1]+0xB288u); // C000AA38
-  W32(c->r[3]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x106A0u),c->r[4]); // C000AA3C
-  c->r[3]=0u+0x00000202u; // C000AA40
-  c->r[5]=0u+0x00000032u; // C000AA44
-  c->r[4]=0u+0x00000078u; // C000AA48
-  c->lr=0xC000AA50u; f_C0033D3C(c); // C000AA4C
-  c->r[3]=0u+0x00000003u; // C000AA50
-  c->lr=0xC000AA58u; f_C0087428(c); // C000AA54
-  {uint32_t ea=c->r[31]+0x00000020u; c->f[1]=c->ps1[1]=RF32(ea);} // C000AA58
-  c->r[3]=0u+0x00000000u; // C000AA5C
-  {uint32_t ea=c->r[31]+0x00000024u; c->f[2]=c->ps1[2]=RF32(ea);} // C000AA60
-  c->r[4]=0u+0x00000000u; // C000AA64
-  {uint32_t ea=c->r[31]+0x00000028u; c->f[3]=c->ps1[3]=RF32(ea);} // C000AA68
-  c->r[5]=0u+0x00000000u; // C000AA6C
-  c->r[6]=0u+0x00000000u; // C000AA70
-  c->r[7]=0u+0x00000024u; // C000AA74
-  c->lr=0xC000AA7Cu; f_C003849C(c); // C000AA78
-  c->r[3]=0u+0x00000002u; // C000AA7C
-  c->r[4]=0u+0x00000002u; // C000AA80
-  c->lr=0xC000AA88u; f_C0087B64(c); // C000AA84
-  c->r[3]=0u+0x00000003u; // C000AA88
-  c->lr=0xC000AA90u; f_C005A440(c); // C000AA8C
-  c->r[3]=0u+0x00000000u; // C000AA90
-  c->lr=0xC000AA98u; f_C005B364(c); // C000AA94
-  c->lr=0xC000AA9Cu; f_C0053620(c); // C000AA98
-  c->r[3]=c->r[30]|c->r[30]; // C000AA9C
-  c->lr=0xC000AAA4u; f_C0020DC8(c); // C000AAA0
-L_C000AAA4:;
-  c->r[0]=R32(c->r[1]+0x00000014u); // C000AAA4
-  c->r[31]=R32(c->r[1]+0x0000000Cu); // C000AAA8
-  c->r[30]=R32(c->r[1]+0x00000008u); // C000AAAC
-  c->lr=c->r[0]; // C000AAB0
-  c->r[1]=c->r[1]+0x00000010u; // C000AAB4
-  return; // C000AAB8
-}
-
-// LA_RSOF_AABC
-void f_C000AABC(Ctx* __restrict c) {
-  trace_call(0xC000AABCu);
-  {uint32_t ea=c->r[1]+0xFFFFFFF0u; W32(ea,c->r[1]); c->r[1]=ea;} // C000AABC
-  c->r[0]=c->lr; // C000AAC0
-  c->r[3]=0u+((uint32_t)(uint16_t)(((g_relsec[0][1]+0xA83Cu)+0x8000u)>>16)<<16); // C000AAC4
-  W32(c->r[1]+0x00000014u,c->r[0]); // C000AAC8
-  c->r[3]=c->r[3]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][1]+0xA83Cu); // C000AACC
-  c->lr=0xC000AAD4u; f_C00092B0(c); // C000AAD0
-  c->r[4]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x1DCu)+0x8000u)>>16)<<16); // C000AAD4
-  c->r[5]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x106F4u)+0x8000u)>>16)<<16); // C000AAD8
-  W32(c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1DCu),c->r[3]); // C000AADC
-  c->r[3]=0u+((uint32_t)(uint16_t)(((g_relsec[0][7]+0x1E0u)+0x8000u)>>16)<<16); // C000AAE0
-  c->r[4]=0u+((uint32_t)(uint16_t)(((g_relsec[0][1]+0xA8B8u)+0x8000u)>>16)<<16); // C000AAE4
-  c->r[0]=0u+0x00000154u; // C000AAE8
-  W32(c->r[3]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x1E0u),c->r[0]); // C000AAEC
-  c->r[4]=c->r[4]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][1]+0xA8B8u); // C000AAF0
-  c->r[5]=R32(c->r[5]+(uint32_t)(int32_t)(int16_t)(uint16_t)(g_relsec[0][7]+0x106F4u)); // C000AAF4
-  c->r[3]=0u+0x00000010u; // C000AAF8
-  c->lr=0xC000AB00u; f_80228F0C(c); // C000AAFC
-  c->lr=0xC000AB04u; f_C00091DC(c); // C000AB00
-  c->r[0]=R32(c->r[1]+0x00000014u); // C000AB04
-  c->lr=c->r[0]; // C000AB08
-  c->r[1]=c->r[1]+0x00000010u; // C000AB0C
-  return; // C000AB10
 }
 

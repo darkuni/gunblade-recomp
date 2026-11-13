@@ -316,9 +316,11 @@ void hle_SCGetAspectRatio(Ctx* c) { c->r[3] = g_cfg.widescreen ? 1 : 0; }
 
 // 2009 KPAD: KPADReadEx(chan, samples, len, s32* err) -> same as KPADRead, plus error code.
 void hle_KPADReadEx(Ctx* c) {
-    uint32_t err = c->r[6];
+    uint32_t chan = c->r[3], err = c->r[6];
     hle_KPADRead(c);
-    if (err) W32(err, 0);   // KPAD_READ_ERR_NONE
+    // KPAD_READ_ERR_NONE for remote 0, KPAD_READ_ERR_NO_CONTROLLER (-2) for the others: Gunblade counts a
+    // channel as a player when its read reports no error (a phantom Player 2 cursor otherwise)
+    if (err) W32(err, chan == 0 ? 0u : (uint32_t)-2);
 }
 
 // void WPADRead(s32 chan, void* status): raw WPAD status. Geometry Wars: Galaxies reads the

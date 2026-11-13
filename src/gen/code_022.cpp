@@ -3823,8 +3823,9 @@ L_80188470:;
   return; // 8018848C
 }
 
+void f_80188490_orig(Ctx* __restrict c);
 // criFsBinder_GetStatus
-void f_80188490(Ctx* __restrict c) {
+void f_80188490_orig(Ctx* __restrict c) {
   trace_call(0x80188490u);
   {uint32_t ea=c->r[1]+0xFFFFFFE0u; W32(ea,c->r[1]); c->r[1]=ea;} // 80188490
   c->r[0]=c->lr; // 80188494
@@ -3923,6 +3924,8 @@ L_801885C4:;
   c->r[1]=c->r[1]+0x00000020u; // 801885D8
   return; // 801885DC
 }
+void hle_wrap_criFsBinder_GetStatus(Ctx*, GuestFn);
+void f_80188490(Ctx* __restrict c) { hle_wrap_criFsBinder_GetStatus(c, f_80188490_orig); }
 
 // fn_801885E0
 void f_801885E0(Ctx* __restrict c) {
@@ -18256,9 +18259,8 @@ L_801943FC:;
   return; // 80194400
 }
 
-void f_80194404_orig(Ctx* __restrict c);
 // mwPlyGetStat
-void f_80194404_orig(Ctx* __restrict c) {
+void f_80194404(Ctx* __restrict c) {
   trace_call(0x80194404u);
   {uint32_t ea=c->r[1]+0xFFFFFFF0u; W32(ea,c->r[1]); c->r[1]=ea;} // 80194404
   c->r[0]=c->lr; // 80194408
@@ -18289,8 +18291,6 @@ L_80194458:;
   c->r[1]=c->r[1]+0x00000010u; // 80194464
   return; // 80194468
 }
-void hle_wrap_mwPlyGetStat(Ctx*, GuestFn);
-void f_80194404(Ctx* __restrict c) { hle_wrap_mwPlyGetStat(c, f_80194404_orig); }
 
 // mwPlyGetRareStat
 void f_8019446C(Ctx* __restrict c) {

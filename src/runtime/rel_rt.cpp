@@ -69,7 +69,9 @@ void hle_wrap_RSOLinkList(Ctx* c, GuestFn orig) {
         if (a && a < 0x80000000u) a += m;     // still an offset
         g_relsec[k][i] = a;
     }
-    fprintf(LOG, "[rso] %s linked at %08X (code %08X, result %u)\n", REL_DESC[k].name, m, g_relsec[k][1], c->r[3]);
+    fprintf(LOG, "[rso] %s linked at %08X (result %u) sections:", REL_DESC[k].name, m, c->r[3]);
+    for (uint32_t i = 0; i < n && i < REL_MAXSEC; i++) if (g_relsec[k][i]) fprintf(LOG, " %u=%08X", i, g_relsec[k][i]);
+    fprintf(LOG, "\n");
     fflush(LOG);
 }
 

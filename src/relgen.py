@@ -109,6 +109,9 @@ def load(gen, img, reldir):
             if sec == cs:
                 starts.add(off)
         starts.add(0)
+        for _, sec, off in getattr(r, 'exports', ()):     # RSO: functions main.dol calls by name
+            if sec == cs and 0 <= off < csize:
+                starts.add(off)
         for off in range(0, csize, 4):
             w = r.word(cs, off)
             m, f = decode(w)

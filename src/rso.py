@@ -46,6 +46,11 @@ class Rso:
         for i in range(self.nsec):
             o, s = struct.unpack('>II', d[so + i * 8:so + i * 8 + 8])
             self.secs.append((o & ~3, s, i == 1 and s > 0))
+        xo, xs, xn = h[16], h[17], h[18]
+        self.exports = []       # (name, section, offset): main.dol calls these through RSO-linked branches
+        for k in range(xs // 16):
+            no, v, sec, _ = struct.unpack('>4I', d[xo + 16 * k:xo + 16 * k + 16])
+            self.exports.append((d[xn + no:d.index(b'\0', xn + no)].decode(), sec, v))
         imports = []
         for k in range(ms // 12):
             no, _, _ = struct.unpack('>3I', d[mo + 12 * k:mo + 12 * k + 12])

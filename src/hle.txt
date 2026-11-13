@@ -13,6 +13,8 @@ __ios_Ipc2
 # Wii Remote: replace WPAD/KPAD (no Bluetooth stack)
 KPADInit = void
 KPADRead            # older entry (Gradius): KPADRead(chan, buf, len)
+KPADReadEx          # Gunblade: KPADReadEx(chan, buf, len, err*)
+KPADInitEx = void
 WPADProbe
 WPADControlMotor = 0
 WPADControlSpeaker = 0
@@ -61,4 +63,7 @@ WPADGetStatus = 3
 # Gunblade NY / L.A. Machineguns: RSO modules (NY_RSOF.rso / LA_RSOF.rso), see runtime/rel_rt.cpp
 RSOLinkList = wrap
 RSOUnLinkList = wrap
-mwPlyGetStat = wrap      # debug: logs status changes (runtime/rel_rt.cpp)
+
+adxt_auto_pause_wii = wrap   # CRI ADX underrun pause at end of stream (runtime/hle_cri.cpp)
+ADXT_GetStat = wrap          # CRILOG=1 logs status changes (runtime/hle_cri.cpp)
+criFsBinder_GetStatus = wrap # CRILOG=1 (runtime/hle_cri.cpp)

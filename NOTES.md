@@ -33,11 +33,25 @@ Dec 2009 SDK fixes); module support adapted from Lost in Shadow's REL code.
   0x80083710, OSDisable/EnableScheduler 0x80082EE0 / 0x80082F20, __OSReschedule 0x80083440, SelectThread idle
   0x80083368, interrupt table r13-0x66A0, IOS heap r13-0x7A5C, KPADStatus 0xF0 (KPADReadEx).
 
+## Runtime fixes
+- CRI ADX: `adxt_auto_pause_wii` pauses the renderer on an output underrun while PLAYING and only un-pauses while
+  PLAYING. If DECEND follows right after the pause, the tail is never played, ADXT never reaches PLAYEND and Sofdec's
+  audio-mastered clock stops ~1 s past the audio. Gunblade's CRIWARE logo movie (movie/US_HD.sfd: 2 s of audio,
+  121 frames) then never ended. `runtime/hle_cri.cpp` resumes playback at DECEND (G_FN_ADXRNA_SETPLAYSW).
+- KPADReadEx hooked; reports KPAD_READ_ERR_NO_CONTROLLER (-2) for channels 1-3 (a phantom Player 2 otherwise).
+- RSO exports are function starts in the recompiled modules (main.dol calls NY_get_object_index_max etc. through
+  RSO-linked branches).
+- The thread dump only follows MEM1/MEM2 addresses (a corrupt thread link crashed it).
+- Debug: CRILOG=1 logs ADXT_GetStat and criFsBinder_GetStatus changes.
+
 ## Status
-- Boots: strap screens, Wii Zapper screen, save (NAND gbla.bin, banner), an online notice whose text renders as
-  boxes (font), "Online Interactions Not Rated by the ESRB", SEGA logo, then the attract movie (movie/US_HD.sfd).
-- Blocker: the attract movie never ends. mwPlyGetStat stays 2 (playing); 91 frames are decoded and released, then
-  none. The whole file is read. The CRI sound renderer's two PCM16 ring voices (PBs 80377F20 / 80378060) run until
-  shortly after the movie starts, then stop. The movie class (Sega::Media::Movie::calc) only waits for
-  movieState() == 4 (no skip), so the game sits on a black screen. Ghost Squad's title movie (Sofdec) also shows
-  grey; likely the same CRI movie/audio path. Umbrella Chronicles' Sofdec (2007, Capcom) works.
+- Boots through strap / Zapper / save / online notice (text renders as boxes) / ESRB / SEGA / CRIWARE movie to the
+  title, PRESS ANY BUTTON, ID select and name entry, main menu (Gunblade NY / L.A. Machineguns / Rankings /
+  Options), the options and difficulty menus.
+- Gunblade NY: NY_RSOF.rso links (bss 0x806F4FE0 in the test runs); the arcade game runs on vm2::VirtualModel2:
+  title (PRESS THE A BUTTON), the attract demo with full Model 2 3D, mission select (shoot with B).
+- Blocker: after choosing EASY / Free UN Headquarters the mission briefing panel never ends. NY::proc_main mode
+  (bss+0x3F848) stays 2; bss+0x3F84C counts up and bss+0x3F854, a countdown decremented once per frame, runs past
+  0 and keeps going negative. Whatever is meant to act at 0 does not. vm2::SoundDriver is ready (binder 4 status
+  2); no ADXT/movie activity in this state.
+- L.A. Machineguns: not tried yet.

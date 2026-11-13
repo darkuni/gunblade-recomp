@@ -7444,8 +7444,9 @@ L_8013082C:;
   return; // 80130840
 }
 
+void f_80130844_orig(Ctx* __restrict c);
 // ADXT_GetStat
-void f_80130844(Ctx* __restrict c) {
+void f_80130844_orig(Ctx* __restrict c) {
   trace_call(0x80130844u);
   {uint32_t ea=c->r[1]+0xFFFFFFF0u; W32(ea,c->r[1]); c->r[1]=ea;} // 80130844
   c->r[0]=c->lr; // 80130848
@@ -7473,6 +7474,8 @@ L_80130884:;
   c->r[1]=c->r[1]+0x00000010u; // 80130898
   return; // 8013089C
 }
+void hle_wrap_ADXT_GetStat(Ctx*, GuestFn);
+void f_80130844(Ctx* __restrict c) { hle_wrap_ADXT_GetStat(c, f_80130844_orig); }
 
 // fn_801308A0
 void f_801308A0(Ctx* __restrict c) {
@@ -10026,8 +10029,9 @@ L_80132AE8:;
   return; // 80132B00
 }
 
+void f_80132B04_orig(Ctx* __restrict c);
 // adxt_auto_pause_wii
-void f_80132B04(Ctx* __restrict c) {
+void f_80132B04_orig(Ctx* __restrict c) {
   trace_call(0x80132B04u);
   {uint32_t ea=c->r[1]+0xFFFFFFE0u; W32(ea,c->r[1]); c->r[1]=ea;} // 80132B04
   c->r[0]=c->lr; // 80132B08
@@ -10116,6 +10120,8 @@ L_80132C34:;
   c->r[1]=c->r[1]+0x00000020u; // 80132C40
   return; // 80132C44
 }
+void hle_wrap_adxt_auto_pause_wii(Ctx*, GuestFn);
+void f_80132B04(Ctx* __restrict c) { hle_wrap_adxt_auto_pause_wii(c, f_80132B04_orig); }
 
 // adxt_stat_playing
 void f_80132C48(Ctx* __restrict c) {

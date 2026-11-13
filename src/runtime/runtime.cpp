@@ -364,15 +364,19 @@ void trace_call(uint32_t a) {
 static void prof_dump();
 #endif
 // Walk the OS active thread list (0x800000DC) and print each thread's state and guest call stack.
+static bool guest_addr_ok(uint32_t a) {      // MEM1 / MEM2 only: a corrupt link must not crash the dump
+    return (a >= 0x80000000u && a < 0x81800000u) || (a >= 0x90000000u && a < 0x94000000u);
+}
+
 static void guest_threads_dump() {
     uint32_t t = R32(0x800000DCu);
-    for (int n = 0; t && n < 32; n++, t = R32(t + 0x2FC)) {
+    for (int n = 0; t && n < 32 && guest_addr_ok(t) && guest_addr_ok(t + 0x300); n++, t = R32(t + 0x2FC)) {
         uint32_t sp = R32(t + 4), lr = R32(t + 0x84);
         fprintf(LOG, "[gthread] %08X state %u prio %d susp %d lr %08X stack:", t, R16(t + 0x2C8), (int)R32(t + 0x2D0),
                 (int)R32(t + 0x2CC), lr);
-        for (int k = 0; k < 16 && sp > 0x80000000u && sp < 0x94000000u; k++) {
+        for (int k = 0; k < 16 && guest_addr_ok(sp); k++) {
             uint32_t nsp = R32(sp);
-            if (!(nsp > 0x80000000u && nsp < 0x94000000u)) break;
+            if (!guest_addr_ok(nsp) || !guest_addr_ok(nsp + 4)) break;
             fprintf(LOG, " %08X", R32(nsp + 4));
             sp = nsp;
         }
