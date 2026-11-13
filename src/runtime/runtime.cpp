@@ -254,6 +254,7 @@ void mtspr(Ctx* c, int spr, uint32_t v) {
         g_cpu_spr[923] = v & ~2u;
         return;
     }
+    if (spr == 921) { extern void gx_wgp_reset(); gx_wgp_reset(); }   // writing WPAR empties the write-gather pipe
     if (cpu_spr(spr)) { g_cpu_spr[spr] = v; return; }
     c->spr[spr] = v;
 }

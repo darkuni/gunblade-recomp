@@ -171,6 +171,12 @@ static long parse_cmd(const uint8_t* p, size_t n, bool in_dl) {
 struct Burst { uint32_t addr, next; std::array<uint8_t, 32> b; };
 static std::deque<Burst> g_bursts;
 static uint8_t g_part[32]; static int g_partn = 0;
+// GXResetWriteGatherPipe (mtwpar) drops bytes left in the pipe. GXBeginDisplayList relies on it: without
+// the reset, the tail left by the previous GXFlush lands at the start of the display list buffer, the
+// list overruns its exactly-sized buffer and GXEndDisplayList reports overflow (size 0). The Model 2/3
+// emulators build per-object lists that way, so a quarter of the polygons vanished (Gunblade NY
+// sidewalks and car roofs, L.A. Machineguns car fronts).
+void gx_wgp_reset() { g_partn = 0; }
 static uint32_t g_rptr = 0;          // physical address of the next burst the GP reads
 static bool g_bp_latched = false;    // interrupt raised for the current stall
 static uint32_t pi_reg(uint32_t a) { return mmio_peek(a); }

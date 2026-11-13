@@ -691,7 +691,8 @@ static void apply_state() {
     // cull
     int cull = (bp[0x00] >> 14) & 3;
     glFrontFace(GL_CW);    // GX front faces are clockwise as seen on screen
-    if (cull == 0) glDisable(GL_CULL_FACE);
+    static bool nocull = getenv("GX_NOCULL") != nullptr;
+    if (cull == 0 || nocull) glDisable(GL_CULL_FACE);
     else { glEnable(GL_CULL_FACE); glCullFace(cull == 1 ? GL_BACK : cull == 2 ? GL_FRONT : GL_FRONT_AND_BACK); }
     // blend / logic op
     uint32_t cm = bp[0x41];
@@ -1074,6 +1075,7 @@ static void efb_copy_impl(uint32_t val) {
         glColorMask((cm >> 3) & 1, (cm >> 3) & 1, (cm >> 3) & 1, (cm >> 4) & 1);
         glDepthMask((zm >> 4) & 1);
         glClearColor((ar & 255) / 255.f, ((gb >> 8) & 255) / 255.f, (gb & 255) / 255.f, ((ar >> 8) & 255) / 255.f);
+        static bool cdbg = getenv("GX_CLEARDEBUG") != nullptr; if (cdbg) glClearColor(1, 0, 1, 1);
         glClearDepth(z / 16777215.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
