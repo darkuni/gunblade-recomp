@@ -1,0 +1,8 @@
+# Statics not in RVL_RSOF.sel, placed by their offset from an exported neighbour in the same SDK object
+# (Lost in Shadow has the identical Dec 11 2009 SDK) or by a unique 6-instruction masked match
+80083210 SelectThread                  # __OSReschedule + (LIS offset); OSThread.c
+8007AD40 DecrementerExceptionCallback  # OSSetAlarm + (LIS offset); OSAlarm.c
+800D4CB0 __ios_Ipc2                    # IPCiProfQueueReq + (LIS offset); ipc
+80098D60 __AXDSPResumeCallback         # unique masked match
+80096F20 __AI_SRC_INIT                 # AIInit + (LIS offset)
+801260D0 KPADiRead                     # KPADReadEx = b KPADiRead
