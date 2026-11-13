@@ -55,6 +55,7 @@
   X(PFNGLSCISSORPROC, glScissor) \
   X(PFNGLSHADERSOURCEPROC, glShaderSource) \
   X(PFNGLTEXIMAGE2DPROC, glTexImage2D) \
+  X(PFNGLTEXSUBIMAGE2DPROC, glTexSubImage2D) \
   X(PFNGLTEXPARAMETERIPROC, glTexParameteri) \
   X(PFNGLUNIFORM1IVPROC, glUniform1iv) \
   X(PFNGLUNIFORM2FVPROC, glUniform2fv) \
@@ -139,6 +140,7 @@ GL_FUNCS(GL_DECLARE)
 #define glScissor p_glScissor
 #define glShaderSource p_glShaderSource
 #define glTexImage2D p_glTexImage2D
+#define glTexSubImage2D p_glTexSubImage2D
 #define glTexParameteri p_glTexParameteri
 #define glUniform1iv p_glUniform1iv
 #define glUniform2fv p_glUniform2fv
